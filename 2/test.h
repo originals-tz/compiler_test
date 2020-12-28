@@ -27,6 +27,11 @@ void Test2()
     assert(!res);
     res = Test2("1");
     res = Test2("1+2-3");
+
+    auto ret = InterpretAST::InterpretAssembly(res);
+    std::string data = InterpretAST::assembly.Generate(ret);
+    std::cout << data << std::endl;
+
     std::cout << InterpretAST::Interpret(res) << std::endl;
 
     res = Test2("1*3/3");
