@@ -36,9 +36,11 @@ struct InterpretAST
                return left_value * right_value;
            case E_ASTOP_DIVIDE:
                return left_value / right_value;
-           default:
+           case E_ASTOP_INTLIT:
                return root->m_intvalue;
        }
+       std::cout << "error : invalid op" << std::endl;
+       exit(-1);
    }
 };
 }
