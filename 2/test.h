@@ -21,7 +21,7 @@ ASTNodePtr Test2(const std::string& input)
     return res;
 }
 
-void GenerateAmbless(ASTNodePtr res)
+void GenerateAssembly(ASTNodePtr res)
 {
     static int i = 0;
     auto ret = InterpretAST::InterpretAssembly(res);
@@ -46,19 +46,19 @@ void Test2()
 
     res = Test2("1+2-3");
     std::cout << InterpretAST::Interpret(res) << std::endl;
-    GenerateAmbless(res);
+    GenerateAssembly(res);
 
     res = Test2("1*3/3");
     std::cout << InterpretAST::Interpret(res) << std::endl;
-    GenerateAmbless(res);
+    GenerateAssembly(res);
 
     res = Test2("1*3-2");
     std::cout << InterpretAST::Interpret(res) << std::endl;
-    GenerateAmbless(res);
+    GenerateAssembly(res);
 
     res = Test2("1+3*2+2");
     std::cout << InterpretAST::Interpret(res) << std::endl;
-    GenerateAmbless(res);
+    GenerateAssembly(res);
 }
 
 }
