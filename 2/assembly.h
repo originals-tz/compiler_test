@@ -39,7 +39,10 @@ public:
         m_ss.str("");
         GenerateBase();
         m_ss << tmp;
-        return m_ss.str();
+        tmp = m_ss.str();
+        m_ss.str("");
+        m_ss.clear();
+        return tmp;
     }
 
     int Load(int value)

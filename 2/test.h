@@ -2,6 +2,7 @@
 #define COMPILER_2TEST_H
 
 #include <cassert>
+#include <fstream>
 #include "interpret.h"
 
 namespace test2
@@ -20,28 +21,44 @@ ASTNodePtr Test2(const std::string& input)
     return res;
 }
 
+void GenerateAmbless(ASTNodePtr res)
+{
+    static int i = 0;
+    auto ret = InterpretAST::InterpretAssembly(res);
+    std::string data = InterpretAST::assembly.Generate(ret);
+    std::cout << data << std::endl;
+
+    std::stringstream ss;
+    ss << i << ".s";
+    std::ofstream file(ss.str(), std::fstream::out | std::fstream::trunc);
+    assert(file.is_open());
+    file << data << std::endl;
+    file.flush();
+    i++;
+}
+
 void Test2()
 {
     ASTNodePtr res;
     res = Test2("");
     assert(!res);
     res = Test2("1");
+
     res = Test2("1+2-3");
-
-    auto ret = InterpretAST::InterpretAssembly(res);
-    std::string data = InterpretAST::assembly.Generate(ret);
-    std::cout << data << std::endl;
-
     std::cout << InterpretAST::Interpret(res) << std::endl;
+    GenerateAmbless(res);
 
     res = Test2("1*3/3");
     std::cout << InterpretAST::Interpret(res) << std::endl;
+    GenerateAmbless(res);
 
     res = Test2("1*3-2");
     std::cout << InterpretAST::Interpret(res) << std::endl;
+    GenerateAmbless(res);
 
     res = Test2("1+3*2+2");
     std::cout << InterpretAST::Interpret(res) << std::endl;
+    GenerateAmbless(res);
 }
 
 }
