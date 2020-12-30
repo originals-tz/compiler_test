@@ -61,6 +61,16 @@ public:
         m_end_token_index = m_token_vect.size();
     }
 
+    std::optional<Token> ViewCurToken()
+    {
+        std::optional<Token> token;
+        if (m_cur_token_index < m_end_token_index)
+        {
+            token = m_token_vect[m_cur_token_index];
+        }
+        return token;
+    }
+
     std::optional<Token> GetNextToken()
     {
         std::optional<Token> token;

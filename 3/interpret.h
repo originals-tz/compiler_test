@@ -78,6 +78,10 @@ struct InterpretAST
                 return left_value / right_value;
             case E_ASTOP_INTLIT:
                 return root->m_intvalue;
+            case E_ASTOP_PRINT:
+                if (root->m_right)
+                    std::cout << "[OUTPUT] : " << right_value << std::endl;
+                return 0;
             default:
                 break;
         }

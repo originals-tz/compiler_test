@@ -8,16 +8,12 @@
 namespace test3
 {
 
-ASTNodePtr Test2(const std::string& input)
+std::vector<ASTNodePtr> Test3(const std::string& input)
 {
     std::cout << "[Test2] input = " << input << std::endl;
     auto scanner = std::make_shared<Scanner>(input);
     Lexer lexer(scanner);
     auto res = lexer.Parse();
-    if (res->m_op == E_ASTOP_EOF)
-    {
-        return nullptr;
-    }
     return res;
 }
 
@@ -39,26 +35,15 @@ void GenerateAssembly(ASTNodePtr res)
 
 void Test3()
 {
-    ASTNodePtr res;
-    res = Test2("");
-    assert(!res);
-    res = Test2("1");
-
-    res = Test2("1+2-3");
-    std::cout << InterpretAST::Interpret(res) << std::endl;
-    GenerateAssembly(res);
-
-    res = Test2("1*3/3");
-    std::cout << InterpretAST::Interpret(res) << std::endl;
-    GenerateAssembly(res);
-
-    res = Test2("1*3-2");
-    std::cout << InterpretAST::Interpret(res) << std::endl;
-    GenerateAssembly(res);
-
-    res = Test2("1+3*2+2");
-    std::cout << InterpretAST::Interpret(res) << std::endl;
-    GenerateAssembly(res);
+    std::string input;
+    input = "print 1+2+3; "
+            "print 2+3-4; ";
+    auto data = Test3(input);
+    for (auto& node : data)
+    {
+        InterpretAST::Interpret(node);
+    }
+    assert(data.size() == 2);
 }
 
 }

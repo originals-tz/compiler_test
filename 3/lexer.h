@@ -50,9 +50,32 @@ public:
     {
     }
 
-    ASTNodePtr Parse()
+    std::vector<ASTNodePtr> Parse()
     {
-        return AdditiveExpr();
+        std::optional<Token> cur;
+        std::vector<ASTNodePtr> nodes_vect;
+        while ((cur = m_scanner->ViewCurToken()))
+        {
+            switch (cur->m_token)
+            {
+                case E_TOKEN_IDENT:
+                    break;
+                case E_TOKEN_PRINT:
+                {
+                    nodes_vect.emplace_back(PrintStatement());
+                    break;
+                }
+                case E_TOKEN_SEMIT:
+                case E_TOKEN_EOF:
+                {
+                    m_scanner->GetNextToken();
+                    break;
+                }
+                default:
+                    exit(-1);
+            }
+        }
+        return nodes_vect;
     }
 
     E_ASTOP Match(E_TOEKN type)
@@ -72,11 +95,12 @@ public:
         exit(-1);
     }
 
-    void PrintStatement()
+    ASTNodePtr PrintStatement()
     {
         auto root_op = Match(E_TOKEN_PRINT);
         auto right = AdditiveExpr();
-        ASTnode::MakeAstNode(root_op, nullptr, right);
+        Match(E_TOKEN_SEMIT);
+        return ASTnode::MakeAstNode(root_op, nullptr, right);
     }
 
     static E_ASTOP Trans(E_TOEKN token_type)
@@ -140,6 +164,7 @@ public:
             auto right = MultiplicativeExpr();
             root = ASTnode::MakeAstNode(op->m_op, left, right);
         }
+        m_scanner->Rollback();
         return root;
     }
 
