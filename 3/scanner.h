@@ -114,6 +114,7 @@ private:
             ss << c;
             c = Next();
         }
+        m_cur_index--;
         return ss.str();
     }
 

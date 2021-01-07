@@ -3,24 +3,49 @@
 
 #include "scanner.h"
 #include <memory>
+#include <map>
 
 namespace test3
 {
 
 enum E_ASTOP
 {
-    E_ASTOP_EOF,
-    E_ASTOP_ADD,
-    E_ASTOP_SUBTRACT,
-    E_ASTOP_MULTIPLY,
-    E_ASTOP_DIVIDE,
-    E_ASTOP_INTLIT,
-    E_ASTOP_EQUALS,
-    E_ASTOP_IDENT,
-    E_ASTOP_PRINT,
-    E_ASTOP_INT,
-    E_ASTOP_SEMIT
+    E_ASTOP_EOF = 0,
+    E_ASTOP_ADD = 1,
+    E_ASTOP_SUBTRACT = 2,
+    E_ASTOP_MULTIPLY = 3,
+    E_ASTOP_DIVIDE = 4,
+    E_ASTOP_INTLIT = 5,
+    E_ASTOP_EQUALS = 6,
+    E_ASTOP_IDENT = 7,
+    E_ASTOP_PRINT = 8,
+    E_ASTOP_INT = 9,
+    E_ASTOP_SEMIT = 10
 };
+
+struct ASTOPInfo
+{
+#define Case(x) case x: return #x;
+    static std::string GetInfo(E_ASTOP& op)
+    {
+        switch (op)
+        {
+            Case(E_ASTOP_EOF)
+            Case(E_ASTOP_ADD)
+            Case(E_ASTOP_SUBTRACT)
+            Case(E_ASTOP_MULTIPLY)
+            Case(E_ASTOP_DIVIDE)
+            Case(E_ASTOP_INTLIT)
+            Case(E_ASTOP_EQUALS)
+            Case(E_ASTOP_IDENT)
+            Case(E_ASTOP_PRINT)
+            Case(E_ASTOP_INT)
+            Case(E_ASTOP_SEMIT)
+        }
+        return "";
+    }
+};
+
 
 struct ASTnode
 {
@@ -28,6 +53,18 @@ struct ASTnode
     std::shared_ptr<ASTnode> m_left;
     std::shared_ptr<ASTnode> m_right;
     int m_intvalue = -1;
+    std::string m_str;
+
+    static std::shared_ptr<ASTnode> MakeAstNode(Token& t, E_ASTOP op)
+    {
+        auto node = std::make_shared<ASTnode>();
+        node->m_op = op;
+        node->m_left = nullptr;
+        node->m_right = nullptr;
+        node->m_intvalue = t.m_intevalue;
+        node->m_str = t.m_str;
+        return node;
+    }
 
     static std::shared_ptr<ASTnode> MakeAstNode(E_ASTOP op, std::shared_ptr<ASTnode> left, std::shared_ptr<ASTnode> right, int value = -1)
     {
@@ -42,10 +79,16 @@ struct ASTnode
 
 using ASTNodePtr = std::shared_ptr<ASTnode>;
 
+struct ParseResult
+{
+    std::vector<ASTnode> m_nodes;
+    std::map<std::string, Token> m_sym_table;
+};
+
 class Lexer
 {
 public:
-    explicit Lexer(std::shared_ptr<Scanner>  scanner)
+    explicit Lexer(std::shared_ptr<Scanner> scanner)
         : m_scanner(std::move(scanner))
     {
     }
@@ -58,16 +101,19 @@ public:
         {
             switch (cur->m_token)
             {
-                case E_TOKEN_IDENT:
+                case E_TOKEN_IDENT: {
+                    nodes_vect.emplace_back(AssignStatement());
                     break;
-                case E_TOKEN_PRINT:
-                {
+                }
+                case E_TOKEN_PRINT: {
                     nodes_vect.emplace_back(PrintStatement());
                     break;
                 }
-                case E_TOKEN_SEMIT:
-                case E_TOKEN_EOF:
-                {
+                case E_TOKEN_INT: {
+                    nodes_vect.emplace_back(VarDeclaration());
+                    break;
+                }
+                case E_TOKEN_EOF: {
                     m_scanner->GetNextToken();
                     break;
                 }
@@ -95,12 +141,33 @@ public:
         exit(-1);
     }
 
+    ASTNodePtr VarDeclaration()
+    {
+        auto root = Match(E_TOKEN_INT);
+        auto left = m_scanner->GetNextToken();
+        assert(left->m_token == E_TOKEN_IDENT);
+        Match(E_TOKEN_SEMIT);
+        auto left_node = ASTnode::MakeAstNode(*left, Trans(left->m_token));
+        m_sym_table[left->m_str] = *left;
+        return ASTnode::MakeAstNode(root, left_node, nullptr);
+    }
+
     ASTNodePtr PrintStatement()
     {
         auto root_op = Match(E_TOKEN_PRINT);
         auto right = AdditiveExpr();
         Match(E_TOKEN_SEMIT);
         return ASTnode::MakeAstNode(root_op, nullptr, right);
+    }
+
+    ASTNodePtr AssignStatement()
+    {
+        auto id = m_scanner->GetNextToken();
+        auto right_node = ASTnode::MakeAstNode(*id, Trans(id->m_token));
+        Match(E_TOKEN_EQUALS);
+        auto left_node = AdditiveExpr();
+        Match(E_TOKEN_SEMIT);
+        return ASTnode::MakeAstNode(E_ASTOP_EQUALS, left_node, right_node);
     }
 
     static E_ASTOP Trans(E_TOEKN token_type)
@@ -184,6 +251,7 @@ public:
 
 private:
     std::shared_ptr<Scanner> m_scanner;
+    std::map<std::string, Token> m_sym_table;
 };
 
 }

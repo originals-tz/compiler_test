@@ -37,13 +37,14 @@ void Test3()
 {
     std::string input;
     input = "print 1+2+3; "
-            "print 2+3-4; ";
+            "print 2+3-4; "
+            "int s;"
+            "s = 100;";
     auto data = Test3(input);
     for (auto& node : data)
     {
         InterpretAST::Interpret(node);
     }
-    assert(data.size() == 2);
 }
 
 }
