@@ -15,8 +15,7 @@ enum E_ASTOP
     E_ASTOP_SUBTRACT = 2,
     E_ASTOP_MULTIPLY = 3,
     E_ASTOP_DIVIDE = 4,
-    E_ASTOP_INTLIT = 5,
-    E_ASTOP_EQUALS = 6,
+    E_ASTOP_INTLIT = 5, E_ASTOP_ASSIGN = 6,
     E_ASTOP_IDENT = 7,
     E_ASTOP_PRINT = 8,
     E_ASTOP_INT = 9,
@@ -36,7 +35,7 @@ struct ASTOPInfo
             Case(E_ASTOP_MULTIPLY)
             Case(E_ASTOP_DIVIDE)
             Case(E_ASTOP_INTLIT)
-            Case(E_ASTOP_EQUALS)
+            Case(E_ASTOP_ASSIGN)
             Case(E_ASTOP_IDENT)
             Case(E_ASTOP_PRINT)
             Case(E_ASTOP_INT)
@@ -167,7 +166,7 @@ public:
         Match(E_TOKEN_EQUALS);
         auto left_node = AdditiveExpr();
         Match(E_TOKEN_SEMIT);
-        return ASTnode::MakeAstNode(E_ASTOP_EQUALS, left_node, right_node);
+        return ASTnode::MakeAstNode(E_ASTOP_ASSIGN, left_node, right_node);
     }
 
     static E_ASTOP Trans(E_TOEKN token_type)
@@ -187,7 +186,7 @@ public:
             case E_TOKEN_INILIT:
                 return E_ASTOP_INTLIT;
             case E_TOKEN_EQUALS:
-                return E_ASTOP_EQUALS;
+                return E_ASTOP_ASSIGN;
             case E_TOKEN_IDENT:
                 return E_ASTOP_IDENT;
             case E_TOKEN_PRINT:
@@ -207,6 +206,12 @@ public:
         {
             std::cout << "error : no primary" << std::endl;
             exit(-1);
+        }
+        if (token->m_token == E_TOKEN_IDENT)
+        {
+            auto node =  ASTnode::MakeAstNode(Trans(token->m_token), nullptr, nullptr, 0);
+            node->m_str = token->m_str;
+            return node;
         }
         return ASTnode::MakeAstNode(Trans(token->m_token), nullptr, nullptr, token->m_intevalue);
     }

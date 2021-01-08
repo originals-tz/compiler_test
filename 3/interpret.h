@@ -12,6 +12,7 @@ namespace test3
 struct InterpretAST
 {
     static Assembly assembly;
+    static std::map<std::string, int> m_var_table;
 
     static int InterpretAssembly(ASTNodePtr root)
     {
@@ -58,6 +59,7 @@ struct InterpretAST
             exit(-1);
         }
         int left_value, right_value;
+        left_value = right_value = 0;
 
         std::function<void()> cal = [&](){
           left_value = right_value = 0;
@@ -88,23 +90,25 @@ struct InterpretAST
             case E_ASTOP_INTLIT:
                 return root->m_intvalue;
             case E_ASTOP_PRINT:
-                // 打印
                 if (root->m_right)
                 {
                     cal();
                     std::cout << "[OUTPUT] : " << right_value << std::endl;
                 }
                 return 0;
-            case E_ASTOP_EQUALS:
-                // 赋值
+            case E_ASTOP_ASSIGN:
+                assert(root->m_left);
+                assert(root->m_right);
+                left_value = Interpret(root->m_left);
+                m_var_table[root->m_right->m_str] = left_value;
+                return 0;
+            case E_ASTOP_IDENT:
+                assert(m_var_table.find(root->m_str) != m_var_table.end()) ;
+                return m_var_table[root->m_str];
+            case E_ASTOP_INT:
+                m_var_table[root->m_left->m_str] = 0;
                 return 0;
             default:
-                // 变量声明
-                switch (root->m_op)
-                {
-                    case E_ASTOP_INT:
-                        return 0;
-                }
                 break;
         }
         std::cout << "error : invalid op" << ASTOPInfo::GetInfo(root->m_op) << std::endl;
@@ -113,6 +117,7 @@ struct InterpretAST
 };
 
 Assembly InterpretAST::assembly;
+std::map<std::string, int> InterpretAST::m_var_table;
 
 }
 

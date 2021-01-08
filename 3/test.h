@@ -39,7 +39,10 @@ void Test3()
     input = "print 1+2+3; "
             "print 2+3-4; "
             "int s;"
-            "s = 100;";
+            "s = 100; "
+            "print s; "
+            "print s + 100; "
+            "print 1 + 2 * s;";
     auto data = Test3(input);
     for (auto& node : data)
     {
