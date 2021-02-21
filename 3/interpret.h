@@ -87,6 +87,24 @@ struct InterpretAST
             case E_ASTOP_DIVIDE:
                 cal();
                 return left_value / right_value;
+            case E_ASTOP_EQ:
+                cal();
+                return left_value == right_value;
+            case E_ASTOP_NE:
+                cal();
+                return left_value != right_value;
+            case E_ASTOP_LT:
+                cal();
+                return left_value < right_value;
+            case E_ASTOP_GT:
+                cal();
+                return left_value > right_value;
+            case E_ASTOP_LE:
+                cal();
+                return left_value <= right_value;
+            case E_ASTOP_GE:
+                cal();
+                return left_value >= right_value;
             case E_ASTOP_INTLIT:
                 return root->m_intvalue;
             case E_ASTOP_PRINT:

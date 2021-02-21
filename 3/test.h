@@ -41,6 +41,9 @@ void Test3()
             "int s;"
             "s = 100; "
             "print s; "
+            "print s == 100;"
+            "print s < 100;"
+            "print s >= 100;"
             "print s + 100; "
             "print 1 + 2 * s;";
     auto data = Test3(input);

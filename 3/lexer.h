@@ -2,6 +2,7 @@
 #define COMPILER_3LEXER_H
 
 #include "scanner.h"
+#include <algorithm>
 #include <memory>
 #include <map>
 
@@ -25,7 +26,7 @@ enum E_ASTOP
     E_ASTOP_LT, // <
     E_ASTOP_GT, // >
     E_ASTOP_LE, // <=
-    E_ASTOP_GE, // >=
+    E_ASTOP_GE // >=
 };
 
 struct ASTOPInfo
@@ -185,7 +186,7 @@ public:
     {
         switch (token_type)
         {
-            case E_TOKEN_EOF :
+            case E_TOKEN_EOF:
                 return E_ASTOP_EOF;
             case E_TOKEN_PLUS:
                 return E_ASTOP_ADD;
@@ -207,7 +208,19 @@ public:
                 return E_ASTOP_INT;
             case E_TOKEN_SEMIT:
                 return E_ASTOP_SEMIT;
-        }
+            case E_TOKEN_EQ:
+                return E_ASTOP_EQ;
+            case E_TOKEN_NE:
+                return E_ASTOP_NE;
+            case E_TOKEN_LT:
+                return E_ASTOP_LT;
+            case E_TOKEN_GT:
+                return E_ASTOP_GT;
+            case E_TOKEN_LE:
+                return E_ASTOP_LE;
+            case E_TOKEN_GE:
+                return E_ASTOP_GE;
+        };
         return E_ASTOP_EOF;
     }
 
@@ -221,7 +234,7 @@ public:
         }
         if (token->m_token == E_TOKEN_IDENT)
         {
-            auto node =  ASTnode::MakeAstNode(Trans(token->m_token), nullptr, nullptr, 0);
+            auto node = ASTnode::MakeAstNode(Trans(token->m_token), nullptr, nullptr, 0);
             node->m_str = token->m_str;
             return node;
         }
@@ -238,6 +251,12 @@ public:
         return ASTnode::MakeAstNode(Trans(token->m_token), nullptr, nullptr);
     }
 
+    template <typename T>
+    bool In(const T& x, const std::vector<T>& vect)
+    {
+        return std::any_of(vect.begin(), vect.end(), [&](const T& t){ return t == x;});
+    }
+
     ASTNodePtr AdditiveExpr()
     {
         auto root = MultiplicativeExpr();
@@ -252,9 +271,29 @@ public:
         return root;
     }
 
-    ASTNodePtr MultiplicativeExpr()
+    ASTNodePtr CompareExpr()
     {
         auto root = Primary();
+        ASTNodePtr op;
+        while ((op = Operator()) &&
+               In(op->m_op, { E_ASTOP_EQ,
+                            E_ASTOP_NE,
+                            E_ASTOP_LT,
+                            E_ASTOP_GT,
+                            E_ASTOP_LE,
+                            E_ASTOP_GE }))
+        {
+            auto left = std::move(root);
+            auto right = Primary();
+            root = ASTnode::MakeAstNode(op->m_op, left, right);
+        }
+        m_scanner->Rollback();
+        return root;
+    }
+
+    ASTNodePtr MultiplicativeExpr()
+    {
+        auto root = CompareExpr();
         ASTNodePtr op;
         while ((op = Operator()) && (op->m_op == E_ASTOP_MULTIPLY || op->m_op == E_ASTOP_DIVIDE))
         {
