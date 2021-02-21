@@ -20,7 +20,13 @@ enum E_TOEKN {
     E_TOKEN_IDENT, // var
     E_TOKEN_PRINT, // print
     E_TOKEN_INT, //int
-    E_TOKEN_SEMIT // ;
+    E_TOKEN_SEMIT, // ;
+    E_TOKEN_EQ, // ==
+    E_TOKEN_NE, // !=
+    E_TOKEN_LT, // <
+    E_TOKEN_GT, // >
+    E_TOKEN_LE, // <=
+    E_TOKEN_GE, // >=
 };
 
 struct Token
@@ -45,6 +51,7 @@ public:
         , m_integer_sv("0123456789")
     {
         m_cur_index = 0;
+        m_last_index = 0;
         m_end_index = m_input_sv.size();
 
 
@@ -131,7 +138,7 @@ private:
         return E_TOKEN_IDENT;
     }
 
-    bool In(char c, std::string_view sv) { return sv.find(c) != std::string_view::npos; }
+    static bool In(char c, std::string_view sv) { return sv.find(c) != std::string_view::npos; }
 
     char Skip()
     {
@@ -146,12 +153,22 @@ private:
     char Next()
     {
         char c = EOF;
+        int tmp_last = m_cur_index;
         if (m_cur_index < m_end_index)
         {
             c = m_input_sv[m_cur_index];
             m_cur_index++;
         }
+        if (m_cur_index != tmp_last)
+        {
+            m_last_index = tmp_last;
+        }
         return c;
+    }
+
+    void Last()
+    {
+        m_cur_index = m_last_index;
     }
 
     std::optional<Token> Scan()
@@ -176,7 +193,43 @@ private:
                 token.m_token = E_TOKEN_SLASH;
                 break;
             case '=':
+                if (Next() == '=')
+                {
+                    token.m_token = E_TOKEN_EQ;
+                    break;
+                }
+                Last();
                 token.m_token = E_TOKEN_EQUALS;
+                break;
+            case '!':
+                c = Next();
+                if (c == '=')
+                {
+                    token.m_token = E_TOKEN_NE;
+                    break;
+                }
+                std::cout << "error, wrong token [" << c << "], excpet = [!=]" << std::endl;
+                return {};
+            case '>':
+                c = Next();
+                if (c == '=')
+                {
+                    token.m_token = E_TOKEN_GE;
+                    break;
+                }
+                Last();
+                token.m_token = E_TOKEN_GT;
+
+                break;
+            case '<':
+                c = Next();
+                if (c == '=')
+                {
+                    token.m_token = E_TOKEN_LE;
+                    break;
+                }
+                Last();
+                token.m_token = E_TOKEN_LT;
                 break;
             case ';':
                 token.m_token = E_TOKEN_SEMIT;
@@ -203,6 +256,7 @@ private:
 
     size_t m_cur_token_index;
     size_t m_end_token_index;
+    size_t m_last_index;
     size_t m_cur_index;
     size_t m_end_index;
     std::string_view m_input_sv;

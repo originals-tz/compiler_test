@@ -19,7 +19,13 @@ enum E_ASTOP
     E_ASTOP_IDENT = 7,
     E_ASTOP_PRINT = 8,
     E_ASTOP_INT = 9,
-    E_ASTOP_SEMIT = 10
+    E_ASTOP_SEMIT = 10,
+    E_ASTOP_EQ, // ==
+    E_ASTOP_NE, // !=
+    E_ASTOP_LT, // <
+    E_ASTOP_GT, // >
+    E_ASTOP_LE, // <=
+    E_ASTOP_GE, // >=
 };
 
 struct ASTOPInfo
@@ -40,6 +46,12 @@ struct ASTOPInfo
             Case(E_ASTOP_PRINT)
             Case(E_ASTOP_INT)
             Case(E_ASTOP_SEMIT)
+            Case(E_ASTOP_EQ)
+            Case(E_ASTOP_NE)
+            Case(E_ASTOP_LT)
+            Case(E_ASTOP_GT)
+            Case(E_ASTOP_LE)
+            Case(E_ASTOP_GE)
         }
         return "";
     }
