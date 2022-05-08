@@ -27,6 +27,12 @@ enum E_TOEKN {
     E_TOKEN_GT, // >
     E_TOKEN_LE, // <=
     E_TOKEN_GE, // >=
+    E_TOKEN_LBRACE, // {
+    E_TOKEN_RBRACE, // }
+    E_TOKEN_LPAREN, // (
+    E_TOKEN_RPAREN, // )
+    E_TOKEN_IF, // if
+    E_TOKEN_ELSE // else
 };
 
 struct Token
@@ -97,6 +103,11 @@ public:
         }
     }
 
+    std::vector<Token> GetToken()
+    {
+        return m_token_vect;
+    }
+
 private:
     int GetInteger(char c)
     {
@@ -134,6 +145,14 @@ private:
         if (str == "int")
         {
             return E_TOKEN_INT;
+        }
+        if (str == "if")
+        {
+            return E_TOKEN_IF;
+        }
+        if (str == "else")
+        {
+            return E_TOKEN_ELSE;
         }
         return E_TOKEN_IDENT;
     }
@@ -234,6 +253,18 @@ private:
             case ';':
                 token.m_token = E_TOKEN_SEMIT;
                 break;
+            case '(':
+                token.m_token = E_TOKEN_LPAREN;
+                break ;
+            case ')':
+                token.m_token = E_TOKEN_RPAREN;
+                break ;
+            case '{':
+                token.m_token = E_TOKEN_LBRACE;
+                break ;
+            case '}':
+                token.m_token = E_TOKEN_RBRACE;
+                break ;
             default:
                 if (isdigit(c))
                 {
@@ -253,6 +284,7 @@ private:
         }
         return token;
     }
+
 
     size_t m_cur_token_index;
     size_t m_end_token_index;

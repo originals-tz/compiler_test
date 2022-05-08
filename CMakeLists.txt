@@ -3,4 +3,8 @@ project(compiler)
 
 set(CMAKE_CXX_STANDARD 17)
 
-add_executable(compiler main.cpp)
+link_directories("/usr/local/lib")
+
+
+add_executable(compiler main.cpp type.pb.cc)
+target_link_libraries(compiler protobuf)

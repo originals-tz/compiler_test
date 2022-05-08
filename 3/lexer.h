@@ -26,7 +26,9 @@ enum E_ASTOP
     E_ASTOP_LT, // <
     E_ASTOP_GT, // >
     E_ASTOP_LE, // <=
-    E_ASTOP_GE // >=
+    E_ASTOP_GE, // >=
+    E_ASTOP_IF, // if
+    E_ASTOP_ELSE // else
 };
 
 struct ASTOPInfo
@@ -105,32 +107,43 @@ public:
     {
     }
 
+    bool GetStatement(std::optional<Token> cur, std::vector<ASTNodePtr>& nodes_vect)
+    {
+        switch (cur->m_token)
+        {
+            case E_TOKEN_IDENT: {
+                nodes_vect.emplace_back(AssignStatement());
+                break;
+            }
+            case E_TOKEN_PRINT: {
+                nodes_vect.emplace_back(PrintStatement());
+                break;
+            }
+            case E_TOKEN_INT: {
+                nodes_vect.emplace_back(VarDeclaration());
+                break;
+            }
+            case E_TOKEN_EOF: {
+                m_scanner->GetNextToken();
+                break;
+            }
+            case E_TOKEN_IF: {
+            }
+            default:
+                return false;
+        }
+        return true;
+    }
+
     std::vector<ASTNodePtr> Parse()
     {
         std::optional<Token> cur;
         std::vector<ASTNodePtr> nodes_vect;
         while ((cur = m_scanner->ViewCurToken()))
         {
-            switch (cur->m_token)
+            if (!GetStatement(cur, nodes_vect))
             {
-                case E_TOKEN_IDENT: {
-                    nodes_vect.emplace_back(AssignStatement());
-                    break;
-                }
-                case E_TOKEN_PRINT: {
-                    nodes_vect.emplace_back(PrintStatement());
-                    break;
-                }
-                case E_TOKEN_INT: {
-                    nodes_vect.emplace_back(VarDeclaration());
-                    break;
-                }
-                case E_TOKEN_EOF: {
-                    m_scanner->GetNextToken();
-                    break;
-                }
-                default:
-                    exit(-1);
+                break ;
             }
         }
         return nodes_vect;
@@ -151,6 +164,14 @@ public:
 
         std::cout << "match error : expect " << type << ", get " << token->m_token << std::endl;
         exit(-1);
+    }
+
+    ASTNodePtr IFStatement()
+    {
+        auto root = Match(E_TOKEN_IF);
+        Match(E_TOKEN_LPAREN);
+        auto left = CompareExpr();
+        Match(E_TOKEN_RPAREN);
     }
 
     ASTNodePtr VarDeclaration()
@@ -220,6 +241,10 @@ public:
                 return E_ASTOP_LE;
             case E_TOKEN_GE:
                 return E_ASTOP_GE;
+            case E_TOKEN_IF:
+                return E_ASTOP_IF;
+            case E_TOKEN_ELSE:
+                return E_ASTOP_ELSE;
         };
         return E_ASTOP_EOF;
     }

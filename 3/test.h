@@ -4,13 +4,25 @@
 #include <cassert>
 #include <fstream>
 #include "interpret.h"
+#include "../type.pb.h"
 
 namespace test3
 {
 
+void TestScan(const std::string& input)
+{
+    std::cout << "[Test] input = " << input << std::endl;
+    auto scanner = std::make_shared<Scanner>(input);
+    auto vect = scanner->GetToken();
+    for (auto& tk : vect)
+    {
+        std::cout << token::token_Name(token::token((int32_t)tk.m_token)) << std::endl;
+    }
+}
+
 std::vector<ASTNodePtr> Test3(const std::string& input)
 {
-    std::cout << "[Test2] input = " << input << std::endl;
+    std::cout << "[Test] input = " << input << std::endl;
     auto scanner = std::make_shared<Scanner>(input);
     Lexer lexer(scanner);
     auto res = lexer.Parse();
@@ -36,16 +48,23 @@ void GenerateAssembly(ASTNodePtr res)
 void Test3()
 {
     std::string input;
-    input = "print 1+2+3; "
-            "print 2+3-4; "
-            "int s;"
-            "s = 100; "
-            "print s; "
-            "print s == 100;"
-            "print s < 100;"
-            "print s >= 100;"
-            "print s + 100; "
-            "print 1 + 2 * s;";
+    input =
+    R"(
+    print 1+2+3;
+    print 2+3-4;
+    int s;
+    s = 100;
+    print s;
+    print s == 100;
+    print s < 100;
+    print s >= 100;
+    print s + 100;
+    if (s + 2 > 10) {
+        print s + 1000;
+    }
+    print 1 + 2 * s;)";
+    TestScan(input);
+    return;
     auto data = Test3(input);
     for (auto& node : data)
     {
