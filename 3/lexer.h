@@ -149,7 +149,7 @@ public:
         return nodes_vect;
     }
 
-    E_ASTOP Match(E_TOEKN type)
+    E_ASTOP Match(E_TOKEN type)
     {
         auto token = m_scanner->GetNextToken();
         if (!token)
@@ -172,6 +172,7 @@ public:
         Match(E_TOKEN_LPAREN);
         auto left = CompareExpr();
         Match(E_TOKEN_RPAREN);
+        return nullptr;
     }
 
     ASTNodePtr VarDeclaration()
@@ -203,7 +204,7 @@ public:
         return ASTnode::MakeAstNode(E_ASTOP_ASSIGN, left_node, right_node);
     }
 
-    static E_ASTOP Trans(E_TOEKN token_type)
+    static E_ASTOP Trans(E_TOKEN token_type)
     {
         switch (token_type)
         {
@@ -245,6 +246,9 @@ public:
                 return E_ASTOP_IF;
             case E_TOKEN_ELSE:
                 return E_ASTOP_ELSE;
+            default:
+                assert(false);
+                break;
         };
         return E_ASTOP_EOF;
     }

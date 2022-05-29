@@ -1,39 +1,50 @@
 #ifndef COMPILER_3SCANNER_H
 #define COMPILER_3SCANNER_H
 
-#include <string_view>
-#include <string>
-#include <optional>
 #include <iostream>
+#include <optional>
+#include <string>
+#include <string_view>
 #include <vector>
 
 namespace test3
 {
-enum E_TOEKN {
-    E_TOKEN_EOF = 1,
-    E_TOKEN_PLUS,   //! +
-    E_TOKEN_MINUS,  //! -
-    E_TOKEN_STAR,   //! *
-    E_TOKEN_SLASH,  //! /
-    E_TOKEN_INILIT,  //! integer
-    E_TOKEN_EQUALS, // =
-    E_TOKEN_IDENT, // var
-    E_TOKEN_PRINT, // print
-    E_TOKEN_INT, //int
-    E_TOKEN_SEMIT, // ;
-    E_TOKEN_EQ, // ==
-    E_TOKEN_NE, // !=
-    E_TOKEN_LT, // <
-    E_TOKEN_GT, // >
-    E_TOKEN_LE, // <=
-    E_TOKEN_GE, // >=
-    E_TOKEN_LBRACE, // {
-    E_TOKEN_RBRACE, // }
-    E_TOKEN_LPAREN, // (
-    E_TOKEN_RPAREN, // )
-    E_TOKEN_IF, // if
-    E_TOKEN_ELSE // else
+#define ENUM                  \
+    X(E_TOKEN_EOF=0, "eof")       \
+    X(E_TOKEN_PLUS, "(+)plus")     \
+    X(E_TOKEN_MINUS, "(-)minus")   \
+    X(E_TOKEN_STAR, "(*)star")     \
+    X(E_TOKEN_SLASH, "(/)slash")   \
+    X(E_TOKEN_INILIT, "(integer)inilit") \
+    X(E_TOKEN_EQUALS, "(=)equals") \
+    X(E_TOKEN_IDENT, "var")     \
+    X(E_TOKEN_PRINT, "print")   \
+    X(E_TOKEN_INT, "int")       \
+    X(E_TOKEN_SEMIT, "(;)semit")   \
+    X(E_TOKEN_EQ, "(==)eq")         \
+    X(E_TOKEN_NE, "(!=)ne")         \
+    X(E_TOKEN_LT, "(<)lt")         \
+    X(E_TOKEN_GT, "(>)gt")         \
+    X(E_TOKEN_LE, "(<=)le")         \
+    X(E_TOKEN_GE, "(>=)ge")         \
+    X(E_TOKEN_LBRACE, "{ : lbrace") \
+    X(E_TOKEN_RBRACE, "} : rbrace") \
+    X(E_TOKEN_LPAREN, "( : lparen") \
+    X(E_TOKEN_RPAREN, ") : rparen") \
+    X(E_TOKEN_IF, "if")         \
+    X(E_TOKEN_ELSE, "else")
+
+#define X(value, name) value,
+enum E_TOKEN {
+    ENUM
 };
+#undef X
+
+#define X(value, name) name,
+char const * E_TOKEN_NAME[] = {
+    ENUM
+};
+#undef X
 
 struct Token
 {
@@ -43,7 +54,7 @@ struct Token
     {
     }
 
-    E_TOEKN m_token;
+    E_TOKEN m_token;
     int m_intevalue;
     std::string m_str;
 };
@@ -59,7 +70,6 @@ public:
         m_cur_index = 0;
         m_last_index = 0;
         m_end_index = m_input_sv.size();
-
 
         std::optional<Token> token;
         while ((token = Scan()))
@@ -103,10 +113,7 @@ public:
         }
     }
 
-    std::vector<Token> GetToken()
-    {
-        return m_token_vect;
-    }
+    std::vector<Token> GetToken() { return m_token_vect; }
 
 private:
     int GetInteger(char c)
@@ -127,7 +134,7 @@ private:
     std::string GetWord(char c)
     {
         std::stringstream ss;
-        while(isalpha(c) || c == '_')
+        while (isalpha(c) || c == '_')
         {
             ss << c;
             c = Next();
@@ -136,7 +143,7 @@ private:
         return ss.str();
     }
 
-    static E_TOEKN GetTypeOfWord(const std::string& str)
+    static E_TOKEN GetTypeOfWord(const std::string& str)
     {
         if (str == "print")
         {
@@ -185,10 +192,7 @@ private:
         return c;
     }
 
-    void Last()
-    {
-        m_cur_index = m_last_index;
-    }
+    void Last() { m_cur_index = m_last_index; }
 
     std::optional<Token> Scan()
     {
@@ -255,16 +259,16 @@ private:
                 break;
             case '(':
                 token.m_token = E_TOKEN_LPAREN;
-                break ;
+                break;
             case ')':
                 token.m_token = E_TOKEN_RPAREN;
-                break ;
+                break;
             case '{':
                 token.m_token = E_TOKEN_LBRACE;
-                break ;
+                break;
             case '}':
                 token.m_token = E_TOKEN_RBRACE;
-                break ;
+                break;
             default:
                 if (isdigit(c))
                 {
@@ -285,7 +289,6 @@ private:
         return token;
     }
 
-
     size_t m_cur_token_index;
     size_t m_end_token_index;
     size_t m_last_index;
@@ -297,5 +300,5 @@ private:
     std::vector<Token> m_token_vect;
 };
 
-}
+}  // namespace test3
 #endif  // COMPILER_SCANNER_H

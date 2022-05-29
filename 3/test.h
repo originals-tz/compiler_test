@@ -4,7 +4,6 @@
 #include <cassert>
 #include <fstream>
 #include "interpret.h"
-#include "../type.pb.h"
 
 namespace test3
 {
@@ -16,7 +15,7 @@ void TestScan(const std::string& input)
     auto vect = scanner->GetToken();
     for (auto& tk : vect)
     {
-        std::cout << token::token_Name(token::token((int32_t)tk.m_token)) << std::endl;
+        std::cout << E_TOKEN_NAME[tk.m_token] << std::endl;
     }
 }
 
@@ -48,28 +47,28 @@ void GenerateAssembly(ASTNodePtr res)
 void Test3()
 {
     std::string input;
-    input =
-    R"(
-    print 1+2+3;
-    print 2+3-4;
-    int s;
-    s = 100;
-    print s;
-    print s == 100;
-    print s < 100;
-    print s >= 100;
-    print s + 100;
-    if (s + 2 > 10) {
-        print s + 1000;
-    }
-    print 1 + 2 * s;)";
+//    input =
+//    R"(
+//    print 1+2+3;
+//    print 2+3-4;
+//    int s;
+//    s = 100;
+//    print s;
+//    print s == 100;
+//    print s < 100;
+//    print s >= 100;
+//    print s + 100;
+//    if (s + 2 > 10) {
+//        print s + 1000;
+//    }
+//    print 1 + 2 * s;)";
+    input = "if (1 +1 > 2) {print 100;}";
     TestScan(input);
-    return;
-    auto data = Test3(input);
-    for (auto& node : data)
-    {
-        InterpretAST::Interpret(node);
-    }
+//    auto data = Test3(input);
+//    for (auto& node : data)
+//    {
+//        InterpretAST::Interpret(node);
+//    }
 }
 
 }
